@@ -4,6 +4,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.javadoc.PsiDocTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +29,7 @@ public interface TestFrameworkStrategy {
     @NotNull PsiMethod createBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull String testDescription);
 
 
+    void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description);
     /**
      *
      * @param sutClass
@@ -61,7 +64,7 @@ public interface TestFrameworkStrategy {
     PsiClass findBackingPsiClass(PsiClass sutClass);
 
     @NotNull
-    String getExpectedNameForThisTestMethod(@NotNull String sutMethodName, @NotNull String description);
+    String getExpectedNameForThisTestMethod(@NotNull String sutMethodName, @NotNull PsiParameter[] parameters, @NotNull String description);
 
     /**
      * Returns the class name that the test class would have if it would be generated.

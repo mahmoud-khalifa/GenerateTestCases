@@ -77,7 +77,7 @@ public class TestClassImpl implements TestClass {
 
 
                 //  comprobar que el tag sea del tipo should
-                if (BddUtil.isValidShouldTag(tag)) {
+                if (BddUtil.isValidShouldTag(tag) || BddUtil.isValidThrowsTag(tag)) {
                     // TODO change it to receive a string instead of the tag, or to test if the tag
                     // have empty description
                     TestMethod tm = TestMethodImpl.newInstance(tag, this, this.frameworkStrategy);

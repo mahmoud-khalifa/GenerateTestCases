@@ -1,10 +1,9 @@
 package com.intellij.generatetestcases.model;
 
 import com.intellij.generatetestcases.testframework.TestFrameworkStrategy;
-import com.intellij.generatetestcases.util.*;
+import com.intellij.generatetestcases.util.BddUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
-import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.javadoc.PsiDocTag;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,13 +17,13 @@ public class TestMethodImpl implements TestMethod {
      * Static factory method
      * Effective Java item 1
      *
-     * @param shouldTag
+     * @param tag
      * @param parent
      * @param frameworkStrategy
      * @return
      */
-    static TestMethodImpl newInstance(@NotNull PsiDocTag shouldTag, @NotNull TestClass parent, TestFrameworkStrategy frameworkStrategy) {
-        return new TestMethodImpl(shouldTag, parent, frameworkStrategy);
+    static TestMethodImpl newInstance(@NotNull PsiDocTag tag, @NotNull TestClass parent, TestFrameworkStrategy frameworkStrategy) {
+        return new TestMethodImpl(tag, parent, frameworkStrategy);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class TestMethodImpl implements TestMethod {
 
     private PsiMethod sutMethod;
 
-    private PsiDocTag shouldTag;
+    private PsiDocTag tag;
 
     private String description;
 
@@ -68,26 +67,26 @@ public class TestMethodImpl implements TestMethod {
     private Project project;
 
     // package protected
-    private TestMethodImpl(@NotNull PsiDocTag shouldTag, @NotNull TestClass parent, TestFrameworkStrategy frameworkStrategy) {
+    private TestMethodImpl(@NotNull PsiDocTag tag, @NotNull TestClass parent, TestFrameworkStrategy frameworkStrategy) {
 
         // TODO instantiate an strategy
         testFrameworkStrategy = frameworkStrategy;
 
-        this.shouldTag = shouldTag;
-        this.project = shouldTag.getProject();
+        this.tag = tag;
+        this.project = tag.getProject();
 
 
         //  obtener el metodo a partir del docTag
-        resolveSutMethod(shouldTag);
+        resolveSutMethod(tag);
         //  initialize the description
-        this.description = BddUtil.getShouldTagDescription(shouldTag);
+        this.description = BddUtil.getTagDescription(tag);
 
         //  bind the current test parent...
-        // TODO get this using the shouldTag, or investigate it better
+        // TODO get this using the tag, or investigate it better
         // TO get the TestClass parent from here without passing it through the constructor
         // it would be needed to implement a registry where we could look for instances for
         // some determined class to guarantee that uniqueness of parents for test methods
-        //this.parent = ((PsiMethod)shouldTag.getParent().getParent()).getContainingClass();
+        //this.parent = ((PsiMethod)tag.getParent().getParent()).getContainingClass();
 
         // FIXME parent is being used to get the backing class, maybe delete this dependency??
 
@@ -95,8 +94,8 @@ public class TestMethodImpl implements TestMethod {
     }
 
 
-    private void resolveSutMethod(PsiDocTag shouldTag) {
-        PsiMethod method = (PsiMethod) shouldTag.getParent().getContext();
+    private void resolveSutMethod(PsiDocTag tag) {
+        PsiMethod method = (PsiMethod) tag.getParent().getContext();
         this.sutMethod = method;
     }
 
@@ -109,6 +108,7 @@ public class TestMethodImpl implements TestMethod {
     public boolean reallyExists() {
         PsiMethod method1 = null;
         if (this.parent.getBackingElement() != null) {
+
             method1 = testFrameworkStrategy.findBackingTestMethod(this.parent.getBackingElement(), sutMethod, description);
         }
         PsiMethod method = method1;
@@ -135,13 +135,7 @@ public class TestMethodImpl implements TestMethod {
 
         }
 
-
-        PsiMethod realTestMethod = testFrameworkStrategy.createBackingTestMethod(parent.getBackingElement(), sutMethod, description);
-//        this.backingMethod = realTestMethod;
-
-        CodeStyleManager codeStyleManager = CodeStyleManager.getInstance(project);
-
-        codeStyleManager.reformat(realTestMethod); // to reformat javadoc
+        testFrameworkStrategy.injectBackingTestMethod(parent.getBackingElement(), sutMethod, tag, description);
 
     }
 
@@ -158,7 +152,7 @@ public class TestMethodImpl implements TestMethod {
 
 
     public PsiDocTag getBackingTag() {
-        return shouldTag;
+        return tag;
     }
 
     public PsiMethod getBackingElement() {

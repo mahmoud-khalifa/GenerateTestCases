@@ -1,7 +1,5 @@
 package com.intellij.generatetestcases.util;
 
-import com.intellij.generatetestcases.testframework.SupportedFrameworks;
-import com.intellij.generatetestcases.testframework.TestFrameworkStrategy;
 import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.StdFileTypes;
@@ -33,26 +31,71 @@ public final class BddUtil {
     /**
      * It will return the trimmed description associated to a PsiDocTag
      *
-     * @param shouldTag
+     * @param tag
      * @return
      * @should return the full description for a should tag backed by a PsiDocTag
      */
-    public static String getShouldTagDescription(PsiDocTag shouldTag) {
-        final StringBuilder description = new StringBuilder();
+    public static String getTagDescription(PsiDocTag tag) {
+        final String description;
 
-        PsiElement[] dataElements = shouldTag.getDataElements();
+        final StringBuilder descriptionBuilder = new StringBuilder("");
+
+        PsiElement[] dataElements = tag.getDataElements();
         boolean isFirst = true;
         for (PsiElement dataElement : dataElements) {
-            description.append(dataElement.getText());
+            descriptionBuilder.append(dataElement.getText());
             // TODO get the description taking into account the whitespaces
             if (isFirst) {
-                description.append(" ");
+                descriptionBuilder.append(" ");
             }
             isFirst = false;
         }
 
-        return description.toString().trim();
+        if (isValidShouldTag(tag)){
+            description = "should " + stripUnwantedCharacters(descriptionBuilder.toString());//.replaceAll("[^A-Za-z0-9_ ]", "").replaceAll("\\s+", " ").trim();
+        } else if (isValidThrowsTag(tag)){
+            StringBuilder stringBuilder = new StringBuilder("throw");
+            String[] descriptionComponents = descriptionBuilder.toString().trim().split(" ");
+            String exception = descriptionComponents[0];
+            if (exception.contains(".")){
+                String[] exceptionComponents = exception.split("\\.");
+                stringBuilder.append(" ").append(exceptionComponents[exceptionComponents.length-1]);
+            } else {
+                stringBuilder.append(" ").append(exception);
+            }
+            for (int i=1; i<descriptionComponents.length; i++){
+                stringBuilder.append(" ").append(descriptionComponents[i]);
+            }
 
+            description = stripUnwantedCharacters(stringBuilder.toString());//.replaceAll("[^A-Za-z0-9_ ]", "").replaceAll("\\s+", " ").trim();
+        } else {
+            throw new IllegalStateException("Invalid tag " + tag.getName());
+        }
+
+        return description;
+
+    }
+
+    private static String stripUnwantedCharacters(final String description) {
+        String newDescription = description;
+        // ====  strip html tags  =====
+        newDescription = newDescription.replaceAll("\\<\\/.+\\>", "");
+        newDescription = newDescription.replaceAll("\\<.+\\>", "");
+
+        // ====  strip javadoc tags  =====
+        newDescription = newDescription.replaceAll("@[^ ]+ ", "");
+
+        // ====  strip illegal characters  =====
+        newDescription = newDescription.replaceAll("[^A-Za-z0-9_ ]", "");
+
+        // ====  Replace multiple whitespaces with only one  =====
+        newDescription = newDescription.replaceAll("\\s+", " ");
+
+        // ====  trim description  =====
+        newDescription = newDescription.trim();
+
+        // ====  Return  =====
+        return newDescription;
     }
 
     /**
@@ -62,7 +105,11 @@ public final class BddUtil {
      * @return
      */
     public static boolean isValidShouldTag(PsiDocTag tag) {
-        return tag.getName().equals(Constants.BDD_TAG) && getShouldTagDescription(tag).length() > 0;
+        return tag.getName().equals(Constants.BDD_TAG);
+    }
+
+    public static boolean isValidThrowsTag(PsiDocTag tag) {
+        return tag.getName().equals(Constants.THROWS_TAG);
     }
 
     /**

@@ -69,7 +69,7 @@ public class ShouldTagRenameDialog extends RenameDialog {
                     if (allMethod.reallyExists()) {
                         TestFrameworkStrategy testFrameworkStrategy = testClass.getTestFrameworkStrategy();
 
-                        newTestMethodName = testFrameworkStrategy.getExpectedNameForThisTestMethod(allMethod.getSutMethod().getName(), getNewName());
+                        newTestMethodName = testFrameworkStrategy.getExpectedNameForThisTestMethod(allMethod.getSutMethod().getName(), allMethod.getSutMethod().getParameterList().getParameters(), getNewName());
 
                         break;
                     }
@@ -134,7 +134,7 @@ public class ShouldTagRenameDialog extends RenameDialog {
 //    @Override
 //    public String[] getSuggestedNames() {
 //
-//        String shouldTagDescription = BddUtil.getShouldTagDescription(shouldDocTag);
+//        String shouldTagDescription = BddUtil.getTagDescription(shouldDocTag);
 //        return new String[] {shouldTagDescription};
 //    }
 

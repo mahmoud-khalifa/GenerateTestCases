@@ -50,12 +50,12 @@ class MyRefactoringElementListener implements RefactoringElementListener {
 
             // get method with name expectedNameForThisTestMethod and rename it directly
             PsiClass psiTestClass = testClass.getBackingElement();
-            PsiMethod[] methodsByName = psiTestClass.findMethodsByName(testFrameworkStrategy.getExpectedNameForThisTestMethod(oldMethodName, testMethod.getDescription()), false);
+            PsiMethod[] methodsByName = psiTestClass.findMethodsByName(testFrameworkStrategy.getExpectedNameForThisTestMethod(oldMethodName, testMethod.getSutMethod().getParameterList().getParameters(), testMethod.getDescription()), false);
 
             for (final PsiMethod psiMethod : methodsByName) {
                 ApplicationManager.getApplication().runWriteAction(new Runnable() {
                     public void run() {
-                        psiMethod.setName(testFrameworkStrategy.getExpectedNameForThisTestMethod(((PsiMethod) newElement).getName(), testMethod.getDescription()));
+                        psiMethod.setName(testFrameworkStrategy.getExpectedNameForThisTestMethod(((PsiMethod) newElement).getName(), testMethod.getSutMethod().getParameterList().getParameters(), testMethod.getDescription()));
                     }
                 });
             }

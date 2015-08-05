@@ -24,8 +24,8 @@ public class JUnit3Strategy extends JUnitStrategyBase {
 
     @NotNull
     @Override
-    public String getExpectedNameForThisTestMethod(String sutMethodName, String description) {
-        String s = super.getExpectedNameForThisTestMethod(sutMethodName, description);
+    public String getExpectedNameForThisTestMethod(String sutMethodName, PsiParameter[] parameters, String description) {
+        String s = super.getExpectedNameForThisTestMethod(sutMethodName, parameters, description);
         return "test" + StringUtils.capitalize(s);
     }
 
@@ -79,7 +79,7 @@ public class JUnit3Strategy extends JUnitStrategyBase {
     }
 
     @Override
-    protected void afterCreatingClass(Project project, PsiClass backingTestClass) {
+    protected void afterCreatingClass(Project project, PsiClass sutClass, PsiClass backingTestClass) {
         PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
         PsiJavaCodeReferenceElement referenceElementByFQClassName = elementFactory.createReferenceElementByFQClassName("junit.framework.TestCase", GlobalSearchScope.allScope(project));
         backingTestClass.getExtendsList().add(referenceElementByFQClassName);

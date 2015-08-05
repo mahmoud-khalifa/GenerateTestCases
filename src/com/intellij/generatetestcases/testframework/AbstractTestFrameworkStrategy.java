@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStrategy {
 
+    private static final String CLASS_TEMPLATE = "UnitTest";
     private Project project;
 
     public AbstractTestFrameworkStrategy(Project project) {
@@ -30,31 +31,37 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
      * Creates a test method name generic in the form {method_under_test}_should{should_description_camel_cased}
      *
      * @param originMethodName
-     * @param shouldDescription
+     * @param description
      * @return
      * @should create a appropiate name for the test method
      * @should fail if wrong args
      */
-    protected static String generateGenericTestMethodName(@NotNull String originMethodName, @NotNull String shouldDescription) {
+    protected static String generateGenericTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description) {
 
-        if (StringUtils.isBlank(originMethodName) || StringUtils.isBlank(shouldDescription)) {
+        if (StringUtils.isBlank(originMethodName)) {
             throw new IllegalArgumentException();
         }
 
-        StringBuilder builder = new StringBuilder(originMethodName
-                + "_should");
-        @NotNull
-        String[] tokens = shouldDescription.split("\\s+");
-        for (String token : tokens) {
-            char[] allChars = token.toCharArray();
-            StringBuilder validChars = new StringBuilder();
-            for (char validChar : allChars) {
-                if (Character.isJavaIdentifierPart(validChar)) {
-                    validChars.append(validChar);
-                }
-            }
-            builder.append(toCamelCase(validChars.toString()));
+        StringBuilder builder = new StringBuilder();
+
+        // ====  test method name  =====
+        builder.append(originMethodName);
+        for (PsiParameter parameter : parameters) {
+            builder.append("_" + parameter.getName());
         }
+
+        builder.append("___");
+
+        String[] descriptionComponents = description.split(" ");
+
+        for (int i = 0; i<descriptionComponents.length; i++) {
+            String descriptionComponent = descriptionComponents[i];
+            if (i==0)
+                builder.append(descriptionComponent.substring(0,1).toUpperCase()).append(descriptionComponent.substring(1));
+            else
+                builder.append("_").append(descriptionComponent);
+        }
+
         return builder.toString();
     }
 
@@ -131,7 +138,7 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
             //  check
             JavaDirectoryService.getInstance().checkCreateClass((PsiDirectory) parentPackage, testClassName);
             //  create
-            ret = JavaDirectoryService.getInstance().createClass((PsiDirectory) parentPackage, testClassName, "Class");
+            ret = JavaDirectoryService.getInstance().createClass((PsiDirectory) parentPackage, testClassName, CLASS_TEMPLATE);
 
         } else {
 
@@ -157,10 +164,10 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
             //  check
             JavaDirectoryService.getInstance().checkCreateClass(psiDirectory, testClassName);
             //  create
-            ret = JavaDirectoryService.getInstance().createClass(psiDirectory, testClassName, "Class");
+            ret = JavaDirectoryService.getInstance().createClass(psiDirectory, testClassName, CLASS_TEMPLATE);
 
         }
-        afterCreatingClass(project, ret);
+        afterCreatingClass(project, sutClass, ret);
         return ret;
 
     }
@@ -171,14 +178,14 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
      * @param project
      * @param backingTestClass
      */
-    protected void afterCreatingClass(Project project, PsiClass backingTestClass) {
+    protected void afterCreatingClass(Project project, PsiClass sutClass, PsiClass backingTestClass) {
 
     }
 
     @Override
     public PsiMethod findBackingTestMethod(PsiClass testClass, PsiMethod sutMethod, String testDescription) {
         //  resolve (find) backing test method in test class
-        String nombreMetodoDePrueba = getExpectedNameForThisTestMethod(sutMethod.getName(), testDescription);
+        String nombreMetodoDePrueba = getExpectedNameForThisTestMethod(sutMethod.getName(), sutMethod.getParameterList().getParameters(), testDescription);
 
         PsiMethod[] byNameMethods = testClass.findMethodsByName(nombreMetodoDePrueba, false);
         if (byNameMethods.length > 0) {
@@ -203,7 +210,7 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
 
         elementFactory = JavaPsiFacade.getElementFactory(sutMethod.getProject());
         //  get test method name
-        PsiMethod factoriedTestMethod = elementFactory.createMethod(getExpectedNameForThisTestMethod(sutMethod.getName(), testDescription), PsiType.VOID);
+        PsiMethod factoriedTestMethod = elementFactory.createMethod(getExpectedNameForThisTestMethod(sutMethod.getName(), sutMethod.getParameterList().getParameters(), testDescription), PsiType.VOID);
 
         //  correr esto dentro de un write-action   ( Write access is allowed inside write-action only )
         testClass.add(factoriedTestMethod);
@@ -271,7 +278,7 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
      */
     @Override
     @NotNull
-    public String getExpectedNameForThisTestMethod(String sutMethodName, String description) {
-        return generateGenericTestMethodName(sutMethodName, description);
+    public String getExpectedNameForThisTestMethod(String sutMethodName, PsiParameter[] parameters, String description) {
+        return generateGenericTestMethodName(sutMethodName, parameters, description);
     }
 }

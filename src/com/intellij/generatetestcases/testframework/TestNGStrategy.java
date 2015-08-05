@@ -4,7 +4,9 @@ import com.intellij.codeInsight.intention.AddAnnotationFix;
 import com.intellij.generatetestcases.util.BddUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.javadoc.PsiDocTag;
 import com.intellij.testIntegration.TestFramework;
+import org.apache.commons.lang.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -70,6 +72,11 @@ public class TestNGStrategy extends AbstractTestFrameworkStrategy {
         }
 
         return backingTestMethod;
+    }
+
+    @Override
+    public void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description) {
+        throw new NotImplementedException();
     }
 
 

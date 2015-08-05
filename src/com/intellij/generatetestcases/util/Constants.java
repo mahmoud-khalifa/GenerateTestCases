@@ -20,6 +20,8 @@ public final  class Constants {
 
     public static final String BDD_TAG = "should";
 
+    public static final String THROWS_TAG = "throws";
+
     public static final String VERIFIES_DOC_TAG = "verifies";
 
 }

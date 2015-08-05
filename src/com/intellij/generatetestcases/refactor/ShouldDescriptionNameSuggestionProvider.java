@@ -50,7 +50,7 @@ public class ShouldDescriptionNameSuggestionProvider implements NameSuggestionPr
         if (shouldDocTag != null) {
             //  KEEP THE DESCRIPTION AS THE ONLY ONE NAME SUGGESTION
             result.clear();
-            result.add(BddUtil.getShouldTagDescription(shouldDocTag));
+            result.add(BddUtil.getTagDescription(shouldDocTag));
         }
         return null;
     }

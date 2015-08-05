@@ -1,16 +1,13 @@
 package com.intellij.generatetestcases.actions;
 
 import com.intellij.codeInsight.generation.ClassMember;
-import com.intellij.generatetestcases.model.BDDCore;
 import com.intellij.generatetestcases.GenerateTestCasesBundle;
+import com.intellij.generatetestcases.model.BDDCore;
 import com.intellij.generatetestcases.model.TestClass;
 import com.intellij.generatetestcases.model.TestMethod;
-import com.intellij.generatetestcases.model.GenerateTestCasesSettings;
 import com.intellij.generatetestcases.testframework.AbstractTestFrameworkStrategy;
-import com.intellij.generatetestcases.testframework.JUnitStrategyBase;
 import com.intellij.generatetestcases.testframework.SupportedFrameworks;
 import com.intellij.generatetestcases.testframework.TestFrameworkStrategy;
-import com.intellij.generatetestcases.ui.codeinsight.GenerateTestCasesConfigurable;
 import com.intellij.generatetestcases.ui.codeinsight.generation.PsiDocAnnotationMember;
 import com.intellij.generatetestcases.util.BddUtil;
 import com.intellij.history.LocalHistory;
@@ -23,19 +20,13 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurableEP;
-import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,7 +38,6 @@ import java.util.List;
  * Time: 12:27:20 PM
  */
 public class GenerateTestMethods extends AnAction {
-
 
     public GenerateTestMethods() {
         super("Generate Test Methods", "Generate test methods for current file", IconLoader.getIcon("/images/junitopenmrs.gif"));
@@ -69,41 +59,41 @@ public class GenerateTestMethods extends AnAction {
         Editor editor = getEditor(dataContext);
 
         //  prompt to choose the strategy if it haven't been choosen before
-        String testFrameworkProperty;
-        if (ApplicationManager.getApplication().isUnitTestMode()) {
-            testFrameworkProperty = "JUNIT3";
-        } else {
-
-
-            GenerateTestCasesSettings casesSettings = GenerateTestCasesSettings.getInstance(project);
-            testFrameworkProperty = casesSettings.getTestFramework();
-
-            if (StringUtils.isEmpty(testFrameworkProperty)) { //  it haven't been defined yet
-
-                ConfigurableEP[] extensions = project.getExtensions(ExtensionPointName.<ConfigurableEP>create("com.intellij.projectConfigurable"));
-//                List<Configurable> list = new ArrayList<Configurable>();
-                for (ConfigurableEP component : extensions) {
-                    Configurable configurable = (Configurable) component.createConfigurable();
-                    if (configurable instanceof GenerateTestCasesConfigurable) {
-                        ShowSettingsUtil.getInstance().editConfigurable(project, configurable);
-                        break;
-                    }
-                }
-
-                //  verify if something has been selected, if not just skip
-                //  overwrite s variable
-                testFrameworkProperty = casesSettings.getTestFramework();
-                if (StringUtils.isEmpty(testFrameworkProperty)) {
-
-                    //  show dialog displaying that there is no framework selection
-                    Messages.showMessageDialog(GenerateTestCasesBundle.message("plugin.GenerateTestCases.framework.notselected.desc"), GenerateTestCasesBundle.message("plugin.GenerateTestCases.framework.notselected"),
-                            Messages.getWarningIcon());
-
-                    return;
-                }
-            }
-
-        }
+        String testFrameworkProperty = "JUNIT4";
+//        if (ApplicationManager.getApplication().isUnitTestMode()) {
+//            testFrameworkProperty = "JUNIT3";
+//        } else {
+//
+//
+//            GenerateTestCasesSettings casesSettings = GenerateTestCasesSettings.getInstance(project);
+//            testFrameworkProperty = casesSettings.getTestFramework();
+//
+//            if (StringUtils.isEmpty(testFrameworkProperty)) { //  it haven't been defined yet
+//
+//                ConfigurableEP[] extensions = project.getExtensions(ExtensionPointName.<ConfigurableEP>create("com.intellij.projectConfigurable"));
+////                List<Configurable> list = new ArrayList<Configurable>();
+//                for (ConfigurableEP component : extensions) {
+//                    Configurable configurable = (Configurable) component.createConfigurable();
+//                    if (configurable instanceof GenerateTestCasesConfigurable) {
+//                        ShowSettingsUtil.getInstance().editConfigurable(project, configurable);
+//                        break;
+//                    }
+//                }
+//
+//                //  verify if something has been selected, if not just skip
+//                //  overwrite s variable
+//                testFrameworkProperty = casesSettings.getTestFramework();
+//                if (StringUtils.isEmpty(testFrameworkProperty)) {
+//
+//                    //  show dialog displaying that there is no framework selection
+//                    Messages.showMessageDialog(GenerateTestCasesBundle.message("plugin.GenerateTestCases.framework.notselected.desc"), GenerateTestCasesBundle.message("plugin.GenerateTestCases.framework.notselected"),
+//                            Messages.getWarningIcon());
+//
+//                    return;
+//                }
+//            }
+//
+//        }
 
         PsiClass psiClass = getSubjectClass(editor, dataContext);
 
@@ -237,6 +227,7 @@ public class GenerateTestMethods extends AnAction {
 
                 @Override
                 protected void run(Result result) throws Throwable {
+
                     LocalHistoryAction action = LocalHistoryAction.NULL;
                     //  wrap this with error management
                     try {
@@ -245,20 +236,28 @@ public class GenerateTestMethods extends AnAction {
                         if (finalCreateParent) {
                             testClass.create(finalDestinationRoot);
                         }
-                        TestMethod lastTestMethod = null;
                         for (TestMethod testMethod : methodsToCreate) {
                             if (!testMethod.reallyExists()) {
                                 testMethod.create();
-                                lastTestMethod = testMethod;
                             }
                         }
-                        //  if something has been created jump to the last created test method, this is 'lastTestMethod'
-//                        if (lastTestMethod != null) {
-                        lastTestMethod.navigate();
-//                        }
+                        testClass.getBackingElement().navigate(true);
+                        reloadTestClass();
                     } finally {
                         action.finish();
                     }
+
+                }
+
+                void reloadTestClass(){
+                    // ====  Get the virtual file of the class  =====
+                    final VirtualFile virtualFile;
+                    virtualFile = testClass.getBackingElement().getContainingFile().getVirtualFile();
+
+                    // ====  refresh class file  =====
+                    boolean asynchronous;
+                    boolean recursive;
+                    virtualFile.refresh(asynchronous = true, recursive = false);
 
                 }
             }.execute();

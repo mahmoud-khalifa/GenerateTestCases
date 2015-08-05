@@ -6,7 +6,6 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.projectRoots.impl.JavaSdkImpl;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -56,16 +55,17 @@ public class BaseTests extends PsiTestCase {
 
     @Override
     protected Sdk getTestProjectJdk() {
+        return null;
         /// add jdk
         //  TODO find better way to override
 //        File mockJdkCEPath = new File(getPluginHomePath(), "java/mockJDK");
 //        return createMockJdk(mockJdkCEPath.getPath(), "java 1.4",
 //                ApplicationManager.getApplication().getComponent(JavaSdk.class));
-        Sdk mockJdk14 = JavaSdkImpl.getMockJdk14();
-        if (mockJdk14 == null) {
-            throw new IllegalStateException("Mock JDK 1.4 is not available, you need to copy ideaIC-source\\java\\mockJDK-1.4 to $user.home\\.IntelliJIdea11\\system\\plugins-sandbox\\test\\community\\java\\mockJDK-1.4");
-        }
-        return mockJdk14;
+//        Sdk mockJdk14 = JavaSdkImpl.getMockJdk14();
+//        if (mockJdk14 == null) {
+//            throw new IllegalStateException("Mock JDK 1.4 is not available, you need to copy ideaIC-source\\java\\mockJDK-1.4 to $user.home\\.IntelliJIdea11\\system\\plugins-sandbox\\test\\community\\java\\mockJDK-1.4");
+//        }
+//        return mockJdk14;
     }
 
 

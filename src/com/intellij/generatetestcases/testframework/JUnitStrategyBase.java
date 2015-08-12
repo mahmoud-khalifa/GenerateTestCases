@@ -311,12 +311,12 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
 
         // ====  Setup  =====
         // ====  Test subject  =====
-        stringBuilder.append("\t\t// ====  SETUP / TEST SUBJECT  ====\n");
+        stringBuilder.append("\t\t// ====  SETUP: TEST SUBJECT  ====\n");
         final String sutStatement = generateSutStatement(sutParameters, parameters.length, description);
         stringBuilder.append(sutStatement);
 
         // ====  Expected result  =====
-        stringBuilder.append("\t\t// ====  SETUP / EXPECTED RESULT  ====\n");
+        stringBuilder.append("\t\t// ====  EXPECTED RESULT  ====\n");
         final String expectResultEqualsStatement = generateExpectResultEqualsStatement(description, returnTypeElement);
         stringBuilder.append(expectResultEqualsStatement);
 
@@ -347,14 +347,14 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
 
         // ====  Setup  =====
         // ====  Test subject  =====
-        stringBuilder.append("\t\t// ====  SETUP / TEST SUBJECT  ====\n");
+        stringBuilder.append("\t\t// ====  SETUP: TEST SUBJECT  ====\n");
         final String sutStatement = generateSutStatement(sutParameters, parameters.length, description);
         stringBuilder.append(sutStatement);
 
 
         // ====  Expected result  =====
         final String exception = description.split(" ")[1];
-        stringBuilder.append("\t\t// ====  SETUP / EXPECTED RESULT  ====\n");
+        stringBuilder.append("\t\t// ====  EXPECTED RESULT  ====\n");
         final String expectExceptionStatement = generateExpectPreapprovedException(exception, description);
         stringBuilder.append(expectExceptionStatement);
 

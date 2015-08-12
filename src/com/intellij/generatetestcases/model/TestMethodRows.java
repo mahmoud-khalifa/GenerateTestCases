@@ -33,6 +33,7 @@ public class TestMethodRows {
 	// #################################################################################################################
 
     private PsiClass containingClass;
+    private Project project;
 	private List<TestMethodRow>	testMethodRows;
 
 	// #################################################################################################################
@@ -43,6 +44,7 @@ public class TestMethodRows {
 							final Project project) {
 
 		testMethodRows = getTestMethodRows(file, project);
+        this.project = project;
 	}
 
 	private TestMethodRows() {
@@ -80,7 +82,13 @@ public class TestMethodRows {
 
 	public void itemSelectedAtIndex(final int index) {
 
-		TestMethodRow testMethodRow = get(index);
+
+        // ====  save containingClass  =====
+        TestFrameworkStrategy frameworkStrategy = SupportedFrameworks.getStrategyForFramework(project, "JUNIT4");
+        saveTestClass(containingClass, frameworkStrategy);
+
+        // ====  perform the action  =====
+        TestMethodRow testMethodRow = get(index);
         testMethodRow.performRequiredAction();
 	}
 

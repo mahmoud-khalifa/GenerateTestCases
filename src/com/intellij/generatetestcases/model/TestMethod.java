@@ -1,5 +1,6 @@
 package com.intellij.generatetestcases.model;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiMethod;
 
 /**
@@ -40,6 +41,7 @@ public interface TestMethod extends TestMember{
     PsiMethod getBackingElement();
 
 
+
     /**
      * Creates a Test method if it didn't exist
      * User should delimit write action... research which is the behaviour of intellij regarding undo operations
@@ -47,7 +49,10 @@ public interface TestMethod extends TestMember{
      * @should create the current test method
      * @should create the parent in the same content source root that its backing method if it didn't exist already
      */
-    void create();
+    int create();
+
+
+    void remove();
 
 
     /**
@@ -68,5 +73,11 @@ public interface TestMethod extends TestMember{
      * @see PsiMethod#navigate(boolean)
      */
     void navigate();
+
+    TestClass getParent();
+
+    String getSuggestedMethodName();
+
+    Project getProject();
 
 }

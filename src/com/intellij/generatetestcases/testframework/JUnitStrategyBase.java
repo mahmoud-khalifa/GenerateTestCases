@@ -23,6 +23,11 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
 
     private Project project;
 
+    @Override
+    public String getSuggestedTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description) {
+        return generateGenericTestMethodName(originMethodName, parameters, description);
+    }
+
     /**
      * This method completes the test method structure returned by {@link AbstractTestFrameworkStrategy#createBackingTestMethod(com.intellij.psi.PsiClass, com.intellij.psi.PsiMethod, java.lang.String)} in the way JUNIT 3 and 4 expect.
      *
@@ -89,7 +94,7 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
     }
 
     @Override
-    public void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description) {
+    public int injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description) {
 
         if (StringUtils.isBlank(description)) {
             throw new IllegalArgumentException("javadoc annotation should not have empty description");
@@ -128,8 +133,22 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
         // ====  Save the text file  =====
         textFile.write(javaFilePath);
 
+
+        return insertionIndex - countLines(testMethod);
+
     }
 
+
+    private static int countLines(String str) {
+        String[] lines = str.split("\r\n|\r|\n");
+        return lines.length;
+    }
+
+
+    @Override
+    public void removeTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod) {
+        sutMethod.navigate(true);
+    }
 
     @Override
     protected void afterCreatingClass(Project project, PsiClass sutClass, PsiClass backingTestClass) {
@@ -304,13 +323,15 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
 
         // ====  Execute  =====
         stringBuilder.append("\t\t// ====  EXECUTE  ====\n");
-        stringBuilder.append("\t\tresult = ");
+        stringBuilder.append("\t\t");
+        if (!returnTypeElement.getText().equals("void"))
+            stringBuilder.append("result = ");
         final String executeStatement = generateExecuteStatement(methodName, parameters, description);
         stringBuilder.append(executeStatement);
 
         // ====  Verify  =====
         stringBuilder.append("\t\t// ====  VERIFY  ====\n");
-        stringBuilder.append("\t\tasserter.assertExpectation(result);\n\n");
+        stringBuilder.append("\t\tasserter.verify(result);\n\n");
 
         // ====  end of Method  =====
         stringBuilder.append("\t}");
@@ -357,17 +378,16 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
         StringBuilder stringBuilder = new StringBuilder();
 
         // ====  calling expectPreapprovedException  =====
+        stringBuilder.append("\t\t// TODO: Add exception message variables, if any\n");
         stringBuilder.append("\t\tasserter.expectPreapprovedException(");
         stringBuilder.append(exception);
-        stringBuilder.append(".class, ApprovalMode.RECORD,");
+        stringBuilder.append(".class, ApprovalMode.RECORD");
 
         if (isInputExists(description)) {
 
             final String input = extractInput(description, null);
-            stringBuilder.append(" ").append(input);
+            stringBuilder.append(", ").append(input);
 
-        } else {
-            stringBuilder.append(" VALUE");
         }
         // ====  end of statement  =====
         stringBuilder.append(");\n\n");
@@ -396,7 +416,7 @@ public abstract class JUnitStrategyBase extends AbstractTestFrameworkStrategy {
                 if (i == 0)
                     stringBuilder.append(parameter.getName());
                 else
-                    stringBuilder.append(", ").append(parameter.getName()).append(i + 1);
+                    stringBuilder.append(", ").append(parameter.getName());
             }
         }
 

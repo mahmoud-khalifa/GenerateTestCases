@@ -26,6 +26,11 @@ public class TestNGStrategy extends AbstractTestFrameworkStrategy {
     }
 
 
+    @Override
+    public String getSuggestedTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description) {
+        throw new NotImplementedException();
+    }
+
     /**
      *
      * @param testClass
@@ -75,9 +80,13 @@ public class TestNGStrategy extends AbstractTestFrameworkStrategy {
     }
 
     @Override
-    public void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description) {
+    public int injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description) {
         throw new NotImplementedException();
     }
 
+    @Override
+    public void removeTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod) {
+        throw new NotImplementedException();
+    }
 
 }

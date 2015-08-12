@@ -9,6 +9,7 @@ import com.intellij.generatetestcases.test.ExpectExceptionsTemplate;
 import com.intellij.psi.*;
 import com.intellij.psi.javadoc.PsiDocTag;
 import com.intellij.testIntegration.TestFramework;
+import org.apache.commons.lang.NotImplementedException;
 import org.hamcrest.core.Is;
 import org.jetbrains.annotations.NotNull;
 
@@ -81,6 +82,11 @@ public class AbstractTestFrameworkStrategyTest extends BaseTests {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
 
+            @Override
+            public String getSuggestedTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description) {
+                throw new NotImplementedException();
+            }
+
             @NotNull
             @Override
             public PsiMethod createBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull String testDescription) {
@@ -88,8 +94,13 @@ public class AbstractTestFrameworkStrategyTest extends BaseTests {
             }
 
             @Override
-            public void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String testDescription) {
+            public int injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String testDescription) {
+                throw new NotImplementedException();
+            }
 
+            @Override
+            public void removeTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod) {
+                throw new NotImplementedException();
             }
 
             @Override
@@ -168,8 +179,18 @@ public class AbstractTestFrameworkStrategyTest extends BaseTests {
             }
 
             @Override
-            public void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String testDescription) {
+            public String getSuggestedTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description) {
+                throw new NotImplementedException();
+            }
 
+            @Override
+            public int injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String testDescription) {
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public void removeTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod) {
+                throw new NotImplementedException();
             }
         });
 

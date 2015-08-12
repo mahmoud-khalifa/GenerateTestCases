@@ -1,9 +1,12 @@
 package com.intellij.generatetestcases.util;
 
 import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiImportStatementImpl;
 import com.intellij.psi.javadoc.PsiDocTag;
@@ -169,6 +172,30 @@ public final class BddUtil {
         PsiImportStatement statement = javaFile.getImportList().getImportStatements()[0];
         PsiImportList list = ((PsiJavaFile) testClass.getContainingFile()).getImportList();
         list.add(statement);
+    }
+
+    public static void navigateToClass(final PsiClass psiClass, int lineNumber) {
+        Project project = psiClass.getProject();
+        VirtualFile virtualFile = psiClass.getContainingFile().getVirtualFile();
+
+        OpenFileDescriptor openFileDescriptor = new OpenFileDescriptor(project, virtualFile, lineNumber, 0);
+        openFileDescriptor.navigate(true);
+    }
+
+
+    public static void reloadClass(PsiClass psiClass) {
+        // ====  Get the virtual file of the class  =====
+        final VirtualFile virtualFile;
+        virtualFile = psiClass.getContainingFile().getVirtualFile();
+
+        // ====  refresh class file  =====
+        boolean asynchronous;
+        boolean recursive;
+        virtualFile.refresh(asynchronous = true, recursive = false);
+
+        // ====  reload from desk =====
+        FileDocumentManager fileDocManager = FileDocumentManager.getInstance();
+        fileDocManager.reloadFiles(virtualFile);
     }
 
     public static class DocOffsetPair {

@@ -242,22 +242,10 @@ public class GenerateTestMethods extends AnAction {
                             }
                         }
                         testClass.getBackingElement().navigate(true);
-                        reloadTestClass();
+                        BddUtil.reloadClass(testClass.getBackingElement());
                     } finally {
                         action.finish();
                     }
-
-                }
-
-                void reloadTestClass(){
-                    // ====  Get the virtual file of the class  =====
-                    final VirtualFile virtualFile;
-                    virtualFile = testClass.getBackingElement().getContainingFile().getVirtualFile();
-
-                    // ====  refresh class file  =====
-                    boolean asynchronous;
-                    boolean recursive;
-                    virtualFile.refresh(asynchronous = true, recursive = false);
 
                 }
             }.execute();

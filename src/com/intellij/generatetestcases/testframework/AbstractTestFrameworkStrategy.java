@@ -101,6 +101,21 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
         return JavaPsiFacade.getInstance(project).findClass(fullyQualifiedTestClass, GlobalSearchScope.projectScope(project));
     }
 
+    @Override
+    public PsiClass findSutPsiClass(PsiClass sutClass) {
+
+        if (sutClass instanceof PsiAnonymousClass) {
+            return null;
+        }
+        String packageName = BddUtil.getPackageName(sutClass);
+        String testClassName = getCandidateSutClassName(sutClass);
+
+
+        String fullyQualifiedTestClass = packageName == null ? testClassName : (packageName + "." + testClassName);
+        //  verify if the test class really exists in classpath for the current module/project
+        return JavaPsiFacade.getInstance(project).findClass(fullyQualifiedTestClass, GlobalSearchScope.projectScope(project));
+    }
+
     /**
      * Meant to be overrided for test classses don't doesn't follow the 'Test' suffix
      * convention in its name
@@ -116,7 +131,15 @@ public abstract class AbstractTestFrameworkStrategy implements TestFrameworkStra
         return s + TEST_CLASS_SUFFIX;
     }
 
+    public String getCandidateSutClassName(PsiClass testClass) {
+        String s = testClass.getName();
+        int length = s.length();
+        int testSuffixLength = TEST_CLASS_SUFFIX.length();
 
+        s = s.substring(0,length- testSuffixLength);
+
+        return s;
+    }
     /**
      *
      * @param sutClass

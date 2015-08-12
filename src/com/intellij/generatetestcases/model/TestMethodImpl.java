@@ -66,7 +66,6 @@ public class TestMethodImpl implements TestMethod {
 
     private Project project;
 
-    // package protected
     private TestMethodImpl(@NotNull PsiDocTag tag, @NotNull TestClass parent, TestFrameworkStrategy frameworkStrategy) {
 
         // TODO instantiate an strategy
@@ -122,7 +121,7 @@ public class TestMethodImpl implements TestMethod {
         this.getBackingElement().navigate(true);
     }
 
-    public void create() {
+    public int create() {
 
 
         if (parent == null) {
@@ -135,12 +134,14 @@ public class TestMethodImpl implements TestMethod {
 
         }
 
-        testFrameworkStrategy.injectBackingTestMethod(parent.getBackingElement(), sutMethod, tag, description);
+        return testFrameworkStrategy.injectBackingTestMethod(parent.getBackingElement(), sutMethod, tag, description);
 
     }
 
-//    private boolean existsInSut;
+    public void remove(){
+        testFrameworkStrategy.removeTestMethod(parent.getBackingElement(), sutMethod);
 
+    }
 
     public String getDescription() {
         return description;  //To change body of implemented methods use File | Settings | File Templates.
@@ -161,5 +162,12 @@ public class TestMethodImpl implements TestMethod {
             method = testFrameworkStrategy.findBackingTestMethod(this.parent.getBackingElement(), sutMethod, description);
         }
         return method;
+    }
+    public String getSuggestedMethodName(){
+        return testFrameworkStrategy.getSuggestedTestMethodName(sutMethod.getName(), sutMethod.getParameterList().getParameters(), description);
+    }
+
+    public Project getProject(){
+        return project;
     }
 }

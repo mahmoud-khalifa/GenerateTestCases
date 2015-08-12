@@ -19,17 +19,23 @@ public interface TestFrameworkStrategy {
 
     String TEST_CLASS_SUFFIX = "Test";
 
-    /**
-     * This strategy will generate a PsiMethod that will back up the {@link com.intellij.generatetestcases.model.TestMethod}
-     *
-     * @param testClass
-     * @param sutMethod
-     * @param testDescription @return
-     */
+    String getSuggestedTestMethodName(@NotNull String originMethodName, @NotNull PsiParameter[] parameters, @NotNull String description);
+
+        /**
+         * This strategy will generate a PsiMethod that will back up the {@link com.intellij.generatetestcases.model.TestMethod}
+         *
+         * @param testClass
+         * @param sutMethod
+         * @param testDescription @return
+         */
     @NotNull PsiMethod createBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull String testDescription);
 
 
-    void injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description);
+    int injectBackingTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod, @NotNull PsiDocTag tag, @NotNull String description);
+
+    void removeTestMethod(@NotNull PsiClass testClass, @NotNull PsiMethod sutMethod);
+
+
     /**
      *
      * @param sutClass
@@ -63,6 +69,8 @@ public interface TestFrameworkStrategy {
      */
     PsiClass findBackingPsiClass(PsiClass sutClass);
 
+    PsiClass findSutPsiClass(PsiClass sutClass);
+
     @NotNull
     String getExpectedNameForThisTestMethod(@NotNull String sutMethodName, @NotNull PsiParameter[] parameters, @NotNull String description);
 
@@ -73,4 +81,5 @@ public interface TestFrameworkStrategy {
      * @return
      */
     String getCandidateTestClassName(PsiClass sutClass);
+
 }

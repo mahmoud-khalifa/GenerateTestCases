@@ -54,6 +54,9 @@
         <component>
             <implementation-class>com.intellij.generatetestcases.model.GenerateTestCasesSettings</implementation-class>
         </component>
+        <component>
+            <implementation-class>com.intellij.generatetestcases.model.GenerateTestCasesProjectComponent</implementation-class>
+        </component>
     </project-components>
 
     <actions>

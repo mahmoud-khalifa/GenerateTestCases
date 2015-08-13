@@ -27,7 +27,10 @@ public class TestMethodRowsTableModel
     }
 
 	public int getRowCount() {
-		return testMethodRows.size();
+        if (testMethodRows != null)
+		    return testMethodRows.size();
+        else
+            return 0;
 	}
 
 	public int getColumnCount() {
@@ -46,6 +49,22 @@ public class TestMethodRowsTableModel
         }
     }
 
+    public void selectedFile(VirtualFile virtualFile) {
+        if (isSelectedFile(virtualFile)) {
+            selectedFile = PsiManager.getInstance(project).findFile(virtualFile);
+        }
+    }
+
+    public void refreshModel() {
+        if (selectedFile.getVirtualFile().getPath().endsWith(".java")) {
+            testMethodRows = TestMethodRows.forFile(selectedFile, project);
+        } else {
+            testMethodRows = TestMethodRows.empty();
+        }
+
+        // Refresh the table view
+        fireTableDataChanged();
+    }
 
     public void updateModel(VirtualFile virtualFile) {
 
@@ -53,15 +72,7 @@ public class TestMethodRowsTableModel
         if (isSelectedFile(virtualFile)){
             System.out.println("Update model for virtual file: " + virtualFile.getName());
             selectedFile = PsiManager.getInstance(project).findFile(virtualFile);
-
-            if (virtualFile.getPath().endsWith(".java")) {
-                testMethodRows = TestMethodRows.forFile(selectedFile, project);
-            } else {
-                testMethodRows = TestMethodRows.empty();
-            }
-
-            // Refresh the table view
-            fireTableDataChanged();
+            refreshModel();
         }
     }
 

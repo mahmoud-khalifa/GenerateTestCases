@@ -23,6 +23,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 
 
 public class TestMethodRowsWindowBuilder implements FileEditorManagerListener {
@@ -72,6 +74,14 @@ public class TestMethodRowsWindowBuilder implements FileEditorManagerListener {
                             model.performAction(table.getSelectedRow());
                     }
                 });
+        table.addHierarchyListener(new HierarchyListener() {
+            @Override
+            public void hierarchyChanged(HierarchyEvent e) {
+                if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) > 0 && table.isShowing()) {
+                    model.refreshModel();
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JBScrollPane(table);
         scrollPane.getVerticalScrollBar().setUnitIncrement(30);
@@ -95,10 +105,10 @@ public class TestMethodRowsWindowBuilder implements FileEditorManagerListener {
     }
 
     private void updateModel (VirtualFile virtualFile){
-//        System.out.println("table.isDisplayable(): " + table.isDisplayable());
-
         if (table.isDisplayable())
             model.updateModel(virtualFile);
+        else
+            model.selectedFile(virtualFile);
     }
     private void listenForMouseEvents() {
         EditorFactory factory = EditorFactory.getInstance();

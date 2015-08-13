@@ -5,6 +5,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.intellij.generatetestcases.testframework.SupportedFrameworks;
 import com.intellij.generatetestcases.testframework.TestFrameworkStrategy;
+import com.intellij.generatetestcases.util.BddUtil;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -12,6 +13,8 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.javadoc.PsiDocComment;
+import com.intellij.psi.javadoc.PsiDocTag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -183,6 +186,10 @@ public class TestMethodRows {
         final List<TestMethodRow> noSubjectTestMethodRows = getNoTestSubjectMethodRows(containingClass, frameworkStrategy, expectedTestMethodRows);
         allTestMethodRows.addAll(noSubjectTestMethodRows);
 
+        // ====  get class methods that have no rules  =====
+        final List<TestMethodRow> noRuleMethodRows = getNoRuleMethodRows(containingClass);
+        allTestMethodRows.addAll(noRuleMethodRows);
+
         return testMethodRowsWithSections(allTestMethodRows);
     }
 
@@ -215,7 +222,12 @@ public class TestMethodRows {
 
         for (TestMethodRow testMethodRow : testMethodRows) {
             String section;
-            if (testMethodRow.getTestMethod() != null){
+            if (testMethodRow.getStatus() == SECTION_Header){
+                PsiMethod method = testMethodRow.getPsiSutMethod();
+                section = testMethodRow.getSectionName();
+                sutMethodsBySection.put(section, method);
+
+            } else if (testMethodRow.getTestMethod() != null){
                 PsiMethod method = testMethodRow.getTestMethod().getSutMethod();
                 section = testMethodRow.getMethodDescription(method);
                 sutMethodsBySection.put(section, method);
@@ -244,7 +256,8 @@ public class TestMethodRows {
             }
 
             for (TestMethodRow testMethodRow : testMethodRowsBySection.get(section)){
-                testMethodRowsWithSections.add(testMethodRow);
+                if (testMethodRow.getStatus() != SECTION_Header)
+                    testMethodRowsWithSections.add(testMethodRow);
             }
 		}
 		return testMethodRowsWithSections;
@@ -287,6 +300,35 @@ public class TestMethodRows {
 		return noTestSubjectMethodRows;
 
 	}
+
+    private List<TestMethodRow> getNoRuleMethodRows(final PsiClass containingClass) {
+        final List<TestMethodRow> noRuleMethodRows = new ArrayList<TestMethodRow>();
+
+
+        PsiMethod[] methods = containingClass.getMethods();
+        for (PsiMethod method : methods) {
+            boolean validJavaDocFound = false;
+
+            PsiDocComment comment = method.getDocComment();
+            if (comment != null) {
+                PsiDocTag[] tags = comment.getTags();
+
+                for (PsiDocTag tag : tags) {
+                    if (BddUtil.isValidShouldTag(tag) || BddUtil.isValidThrowsTag(tag)) {
+                        validJavaDocFound = true;
+                        break;
+                    }
+                }
+            }
+            if (validJavaDocFound == false && method.getModifierList().hasModifierProperty("private") == false && !method.isConstructor()) {
+                TestMethodRow testMethodRow = TestMethodRow.createSectionWithMethod(method);
+                noRuleMethodRows.add(testMethodRow);
+            }
+        }
+
+        return noRuleMethodRows;
+    }
+
 
 	private boolean isTestMethod(final PsiMethod method) {
 

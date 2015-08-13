@@ -114,10 +114,18 @@ public class TestMethodRow {
         return psiTestMethod;
     }
 
+    public PsiMethod getPsiSutMethod() {
+        return psiSutMethod;
+    }
+
+
     public String getKey() {
         return key;
     }
 
+    public String getSectionName() {
+        return sectionName;
+    }
     public String getDescription(){
 
         StringBuilder stringBuilder = new StringBuilder();

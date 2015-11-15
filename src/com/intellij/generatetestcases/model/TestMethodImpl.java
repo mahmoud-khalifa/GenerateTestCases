@@ -3,9 +3,16 @@ package com.intellij.generatetestcases.model;
 import com.intellij.generatetestcases.testframework.TestFrameworkStrategy;
 import com.intellij.generatetestcases.util.BddUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.javadoc.PsiDocTag;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: Jaime Hablutzel
@@ -129,8 +136,23 @@ public class TestMethodImpl implements TestMethod {
             // TODO create a stub for the parent or look in registry
             // TODO log it 
         } else if (parent != null && !parent.reallyExists()) {
-            //  if parent doesn't exist, create it
-            parent.create(null);
+            PsiDirectory classSourceRoot = null;
+
+            VirtualFile[] sourceRoots = ProjectRootManager.getInstance(project).getContentSourceRoots();
+            final PsiManager manager = PsiManager.getInstance(project);
+
+            for (VirtualFile sourceRoot : sourceRoots) {
+                if (sourceRoot.isDirectory() && sourceRoot.getPath().contains(project.getName()) && sourceRoot.getPath().contains("src/test/java")) {
+                    PsiDirectory directory = manager.findDirectory(sourceRoot);
+                    if (directory != null) {
+                        classSourceRoot = directory;
+                        break;
+                    }
+                }
+            }
+
+            parent.create(classSourceRoot);
+
 
         }
 

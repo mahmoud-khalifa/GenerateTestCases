@@ -21,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: Jaime Hablutzel
@@ -81,6 +83,11 @@ public final class BddUtil {
 
     private static String stripUnwantedCharacters(final String description) {
         String newDescription = description;
+
+        // ====  strip javadoc tags  =====
+        newDescription = removeJavaDoc(newDescription, "literal");
+        newDescription = removeJavaDoc(newDescription, "code");
+
         // ====  strip html tags  =====
         newDescription = newDescription.replaceAll("\\<\\/.+\\>", "");
         newDescription = newDescription.replaceAll("\\<.+\\>", "");
@@ -101,6 +108,25 @@ public final class BddUtil {
         return newDescription;
     }
 
+    private static String removeJavaDoc(final String description, final String tag) {
+        String newDescription = description;
+        String literalPattern = "\\{@" + tag + "\\s*\\<.+\\>\\}";
+        Pattern pattern = Pattern.compile(literalPattern);
+        Matcher matcher = pattern.matcher(newDescription);
+        while (matcher.find()) {
+            String match = matcher.group();
+            match = match.replace("{@" + tag + "","").replace("}", "").trim();
+            match = match.substring(1, match.length()-1);
+            newDescription = newDescription.replaceFirst(literalPattern, match);
+            matcher = pattern.matcher(newDescription);
+        }
+
+        return newDescription;
+    }
+
+    public static void main(String[] args) {
+        stripUnwantedCharacters("return the commits of <b>builder</b> then <b>test</b>  {@literal <the <b>builder</b> then <b>test</b>>}");
+    }
     /**
      * This method test that a PsiDocTag has the name "should" and that its description isn't empty
      *
